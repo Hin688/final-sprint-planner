@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>期末复习规划站</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <h1>Final Sprint Planner</h1>
+        </div>
+        <div class="hero-card">
+          <div class="stat">
+            <span>科目总数</span>
+            <strong id="subjectCount">0</strong>
+          </div>
+          <div class="stat">
+            <span>最近项目</span>
+            <strong id="nextDeadline">暂无</strong>
+          </div>
+          <div class="stat">
+            <span>本日计划</span>
+            <strong id="planCount">0 项</strong>
+          </div>
+        </div>
+        <section class="today-focus-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">今天要做</p>
+              <h2 id="todayFocusTitle">今日安排</h2>
+            </div>
+          </div>
+          <div id="todayFocusList" class="selected-date-plans"></div>
+        </section>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel calendar-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">复习日历</p>
+              <h2>安排每天的计划</h2>
+            </div>
+            <div class="calendar-toolbar">
+              <button type="button" class="ghost-btn" id="prevMonth">上个月</button>
+              <div id="calendarTitle" class="calendar-title"></div>
+              <button type="button" class="ghost-btn" id="nextMonth">下个月</button>
+            </div>
+          </div>
+
+          <form id="planForm" class="plan-form">
+            <label>
+              日期
+              <input type="date" id="planDate" required />
+            </label>
+            <label>
+              关联科目
+              <select id="planSubject"></select>
+            </label>
+            <label class="wide">
+              计划内容
+              <input type="text" id="planText" placeholder="有什么计划么～" required />
+            </label>
+            <button type="submit" class="primary-btn">添加计划</button>
+          </form>
+
+          <div class="calendar-grid-wrap">
+            <div class="weekday-row">
+              <span>一</span>
+              <span>二</span>
+              <span>三</span>
+              <span>四</span>
+              <span>五</span>
+              <span>六</span>
+              <span>日</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+        </section>
+      </main>
+
+      <section class="panel created-panel">
+        <div class="created-subjects-head">
+          <div>
+            <p class="section-kicker">科目分组</p>
+            <h3>科目栏目</h3>
+          </div>
+          <button type="button" id="openSubjectModal" class="primary-btn">创建科目</button>
+        </div>
+        <div id="subjectList" class="subject-list created-subjects"></div>
+      </section>
+
+      <section class="panel completed-panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">已完成</p>
+            <h2>完成记录与兑换</h2>
+          </div>
+        </div>
+
+        <div class="completed-layout">
+          <div class="completed-column">
+            <div id="completedBoard" class="completed-board"></div>
+            <div class="reward-tabs">
+              <button type="button" class="ghost-btn reward-tab is-active" data-tab="rules">奖励机制</button>
+              <button type="button" class="ghost-btn reward-tab" data-tab="custom">自定义奖励</button>
+              <button type="button" class="ghost-btn reward-tab" data-tab="redeemed">兑换记录</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="reward-summary">
+        <div id="rewardProgressList" class="reward-progress-list"></div>
+          <div id="selectedTaskInfo" class="selected-task-info"></div>
+        </div>
+      </section>
+    </div>
+
+    <dialog id="subjectModal" class="day-modal">
+      <div class="day-modal-card form-modal-card">
+        <div class="day-modal-head">
+          <h3>创建科目</h3>
+          <button type="button" class="danger-btn" id="closeSubjectModal">关闭</button>
+        </div>
+        <form id="subjectForm" class="subject-form">
+          <label>
+            科目名称
+            <input type="text" id="subjectName" placeholder="请输入科目" required />
+          </label>
+          <label>
+            分组/标签
+            <select id="subjectGroup" required>
+              <option value="专业课">专业课</option>
+              <option value="通选课">通选课</option>
+            </select>
+          </label>
+          <label class="wide">
+            备注
+            <textarea id="subjectNote" rows="3" placeholder="～～"></textarea>
+          </label>
+          <button type="submit" class="primary-btn">添加科目</button>
+        </form>
+      </div>
+    </dialog>
+
+    <dialog id="confirmModal" class="day-modal">
+      <div class="day-modal-card confirm-modal-card">
+        <div class="day-modal-head">
+          <h3 id="confirmModalTitle">确认删除</h3>
+          <button type="button" class="danger-btn" id="closeConfirmModal">关闭</button>
+        </div>
+        <div class="day-modal-content">
+          <p id="confirmModalText" class="detail-line">确认要删除吗？</p>
+        </div>
+        <div class="confirm-actions">
+          <button type="button" class="ghost-btn" id="cancelConfirmModal">取消</button>
+          <button type="button" class="danger-btn" id="confirmModalAction">删除</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div id="rewardPopup" class="reward-popup hidden">
+      <div class="reward-popup-card">
+        <div class="reward-popup-head">
+          <h3 id="rewardPopupTitle">奖励机制</h3>
+          <button type="button" class="danger-btn" id="closeRewardPopup">关闭</button>
+        </div>
+        <div id="rewardRulesPanel" class="reward-view"></div>
+        <div id="rewardCustomPanel" class="reward-view hidden">
+          <p class="section-kicker">自定义</p>
+          <h3>新增奖励</h3>
+          <form id="rewardForm" class="reward-form">
+            <label>
+              完成几个任务
+              <input type="number" id="rewardCount" min="1" required />
+            </label>
+            <label>
+              兑换什么
+              <input type="text" id="rewardLabel" required />
+            </label>
+            <button type="submit" class="primary-btn">添加规则</button>
+          </form>
+        </div>
+        <div id="rewardRedeemedPanel" class="reward-view hidden">
+          <p class="section-kicker">已兑换</p>
+          <h3>兑换记录</h3>
+          <div id="redeemedBoard" class="redeemed-board"></div>
+        </div>
+      </div>
+    </div>
+
+    <template id="subjectCardTemplate">
+      <article class="subject-card">
+        <div class="subject-card-head">
+          <div>
+            <h3 class="subject-title"></h3>
+            <p class="subject-meta"></p>
+          </div>
+          <div class="subject-actions">
+            <label class="ghost-btn subject-upload-label">
+              补充资料
+              <input
+                type="file"
+                class="subject-upload-input"
+                multiple
+                accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              />
+            </label>
+            <button type="button" class="danger-btn subject-delete">删除</button>
+          </div>
+        </div>
+        <p class="subject-note"></p>
+        <div class="subject-block">
+          <div class="subject-block-head">
+            <h4>期末考试时间</h4>
+          </div>
+          <div class="exam-row">
+            <input type="date" class="exam-time-input" />
+            <button type="button" class="ghost-btn save-exam-time">保存考试时间</button>
+          </div>
+          <div class="exam-time-display"></div>
+        </div>
+
+        <div class="subject-block">
+          <div class="subject-block-head">
+            <h4>作业 DDL</h4>
+          </div>
+          <form class="assignment-form">
+            <input type="text" class="assignment-title-input" placeholder="名字" required />
+            <input type="date" class="assignment-deadline-input" required />
+            <button type="submit" class="primary-btn">添加 DDL</button>
+          </form>
+          <div class="assignment-list"></div>
+        </div>
+
+        <div class="resource-section">
+          <div class="subject-block-head">
+            <h4>资料</h4>
+          </div>
+          <div class="resource-list"></div>
+        </div>
+      </article>
+    </template>
+
+    <template id="planItemTemplate">
+      <article class="plan-item">
+        <div>
+          <h4 class="plan-item-title"></h4>
+          <p class="plan-item-subject"></p>
+          <p class="plan-item-note"></p>
+        </div>
+        <button type="button" class="danger-btn plan-delete">删除</button>
+      </article>
+    </template>
+
+    <dialog id="dayModal" class="day-modal">
+      <div class="day-modal-card">
+        <div class="day-modal-head">
+          <h3 id="dayModalTitle">详细安排</h3>
+          <button type="button" class="danger-btn" id="closeDayModal">关闭</button>
+        </div>
+        <div id="dayModalContent" class="day-modal-content"></div>
+      </div>
+    </dialog>
+
+    <dialog id="infoModal" class="day-modal">
+      <div class="day-modal-card">
+        <div class="day-modal-head">
+          <h3 id="infoModalTitle">详情</h3>
+          <button type="button" class="danger-btn" id="closeInfoModal">关闭</button>
+        </div>
+        <div id="infoModalContent" class="day-modal-content"></div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
