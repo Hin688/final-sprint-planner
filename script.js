@@ -81,7 +81,10 @@ bootstrap();
 
 async function bootstrap() {
   hydrateState();
-  refs.planDate.value = state.selectedDate;
+  rollOverPendingPlans();
+  state.selectedDate = todayKey();
+  state.currentMonth = firstDayOfMonth(new Date());
+  refs.planDate.value = todayKey();
   await renderAll();
   bindEvents();
 }
@@ -159,6 +162,15 @@ function hydrateState() {
   }
 }
 
+function rollOverPendingPlans() {
+  const today = todayKey();
+  state.plans.forEach((plan) => {
+    if (plan.date < today) {
+      plan.date = today;
+    }
+  });
+}
+
 function persistState() {
   localStorage.setItem(
     STORAGE_KEY,
@@ -224,12 +236,13 @@ function handlePlanSubmit(event) {
   state.selectedDate = date;
   state.currentMonth = firstDayOfMonth(new Date(`${date}T00:00:00`));
   refs.planForm.reset();
-  refs.planDate.value = state.selectedDate;
+  refs.planDate.value = todayKey();
   persistState();
   renderAll();
 }
 
 async function renderAll() {
+  refs.planDate.value = todayKey();
   state.completed.forEach(normalizeCompletedItem);
   await renderSubjects();
   renderSubjectSelect();
@@ -455,7 +468,6 @@ function renderCalendar() {
 
     cell.addEventListener("click", () => {
       state.selectedDate = dayKey;
-      refs.planDate.value = dayKey;
       if (!day.inCurrentMonth) {
         state.currentMonth = firstDayOfMonth(day.date);
       }
